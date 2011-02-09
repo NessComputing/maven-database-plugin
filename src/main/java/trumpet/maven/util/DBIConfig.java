@@ -3,33 +3,21 @@ package trumpet.maven.util;
 import org.skife.config.Config;
 import org.skife.config.DefaultNull;
 
-public abstract class DBIConfig
+public interface DBIConfig
 {
-    @Config("${_dbi_name}.driver")
+    @Config({"${_dbi_name}driver", "trumpet.default.driver"})
     @DefaultNull
-    public String getDBDriverClass()
-    {
-        return null;
-    }
+    String getDBDriverClass();
 
-    @Config("${_dbi_name}.url")
+    @Config({"${_dbi_name}url"})
     @DefaultNull
-    public String getDBUrl()
-    {
-        return null;
-    }
+    String getDBUrl();
 
-    @Config("${_dbi_name}.user")
+    @Config({"${_dbi_name}user", "trumpet.default.user"})
     @DefaultNull
-    public String getDBUser()
-    {
-        return null;
-    }
+    String getDBUser();
 
-    @Config("${_dbi_name}.password")
+    @Config({"${_dbi_name}password", "trumpet.default.password"})
     @DefaultNull
-    public String getDBPassword()
-    {
-        return null;
-    }
+    String getDBPassword();
 }
