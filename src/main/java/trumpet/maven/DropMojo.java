@@ -1,5 +1,7 @@
 package trumpet.maven;
 
+import io.trumpet.migratory.MigratoryOption;
+
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -60,16 +62,18 @@ public class DropMojo extends AbstractDatabaseMojo
                 if (databaseExists) {
                     LOG.info("Dropping Database {}...", database);
 
-                    rootDbi.withHandle(new HandleCallback<Void>() {
-                        @Override
-                        public Void withHandle(final Handle handle) {
-                            handle.createStatement("#mojo:drop_database")
-                            .define("database", database)
-                            .execute();
-                            return null;
-                        }
+                    if (!MigratoryOption.containsOption(MigratoryOption.DRY_RUN, optionList)) {
+                        rootDbi.withHandle(new HandleCallback<Void>() {
+                            @Override
+                            public Void withHandle(final Handle handle) {
+                                handle.createStatement("#mojo:drop_database")
+                                .define("database", database)
+                                .execute();
+                                return null;
+                            }
 
-                    });
+                        });
+                    }
 
                     LOG.info("... done");
                 }

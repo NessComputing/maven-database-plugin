@@ -5,7 +5,7 @@
         <artifactId>base</artifactId>
         <version>5.1</version>
     </parent>
-    <groupId>io.trumpet.maven</groupId>
+    <groupId>io.trumpet.mojo</groupId>
     <artifactId>maven-database-plugin</artifactId>
     <version>0.1-SNAPSHOT</version>
 
@@ -17,6 +17,12 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.trumpet.components</groupId>
+            <artifactId>tc-httpclient</artifactId>
+            <version>4.2</version>
+        </dependency>
+
         <dependency>
             <groupId>io.trumpet.migratory</groupId>
             <artifactId>migratory-core</artifactId>
@@ -40,6 +46,12 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>r07</version>
         </dependency>
 
         <dependency>

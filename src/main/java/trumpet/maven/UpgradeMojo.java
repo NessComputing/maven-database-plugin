@@ -16,8 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
+import trumpet.maven.util.HttpLoader;
 import trumpet.maven.util.MojoLocator;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 
 
@@ -41,7 +43,6 @@ public class UpgradeMojo extends AbstractDatabaseMojo
      * follow=follow Migrate follow personality in the follow database to latest version
      *
      * @parameter expression="${migrations}"
-     * @required
      */
     private String migrations = "all";
 
@@ -71,8 +72,9 @@ public class UpgradeMojo extends AbstractDatabaseMojo
                     LOG.info("Migrating {} ...", databaseName);
 
                     Migratory migratory = new Migratory(config, dbi, rootDbDbi);
+                    migratory.addLoader(new HttpLoader(Charsets.UTF_8));
                     migratory.addLocator(new MojoLocator(migratory, manifestUrl));
-                    migratory.dbMigrate(rootMigrationPlan);
+                    migratory.dbMigrate(rootMigrationPlan, optionList);
                 }
             }
             catch (MigratoryException me) {

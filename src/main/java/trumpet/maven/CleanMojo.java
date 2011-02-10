@@ -49,8 +49,8 @@ public class CleanMojo extends AbstractDatabaseMojo
             final MigratoryConfig config = factory.build(MigratoryConfig.class);
 
             try {
-                Migratory migratory = new Migratory(config, dbi, rootDbDbi);
-                migratory.dbClean();
+                final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
+                migratory.dbClean(optionList);
             }
             catch (MigratoryException me) {
                 LOG.warn("While cleaning {}: {}", database, me);

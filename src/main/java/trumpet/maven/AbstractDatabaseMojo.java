@@ -1,5 +1,6 @@
 package trumpet.maven;
 
+import io.trumpet.migratory.MigratoryOption;
 import io.trumpet.migratory.loader.FileLoader;
 import io.trumpet.migratory.loader.JarLoader;
 import io.trumpet.migratory.loader.LoaderManager;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.Configuration;
@@ -27,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
+import trumpet.maven.util.HttpLoader;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -45,6 +48,8 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
 
     protected final LoaderManager loaderManager = new LoaderManager();
 
+    protected MigratoryOption [] optionList;
+
     /**
      * @parameter expression="${manifest.url}"
      * @required
@@ -55,6 +60,12 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
      * @parameter expression="${manifest.name}"
      */
     private String manifestName = "development";
+
+    /**
+     * @parameter expression="${options}"
+     */
+    private String options;
+
 
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException
@@ -67,17 +78,28 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
 
             loaderManager.addLoader(new FileLoader(Charsets.UTF_8));
             loaderManager.addLoader(new JarLoader(Charsets.UTF_8));
+            loaderManager.addLoader(new HttpLoader(Charsets.UTF_8));
+
+            this.optionList = parseOptions(options);
 
             final StringBuilder location = new StringBuilder(manifestUrl);
             if (!manifestUrl.endsWith("/")) {
                 location.append("/");
             }
+            manifestUrl = location.toString();
+
+            // After here, the manifestUrl is guaranteed to have a / at the end!
+
             location.append(manifestName);
             location.append(".manifest");
 
             LOG.debug("Manifest location: {}", location);
 
             final String contents = loaderManager.loadFile(URI.create(location.toString()));
+
+            if (contents == null) {
+                throw new MojoExecutionException("Could not load manifest '" + manifestName + "' from '" + manifestUrl + "'");
+            }
 
             final CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
             config.addConfiguration(new SystemConfiguration(), "systemProperties");
@@ -193,6 +215,24 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         }
         return databaseList;
     }
+
+    protected MigratoryOption [] parseOptions(final String options)
+    {
+        final String [] optionList = StringUtils.stripAll(StringUtils.split(options, ","));
+
+        if (optionList == null) {
+            return new MigratoryOption[0];
+        }
+
+        final MigratoryOption [] migratoryOptions = new MigratoryOption[optionList.length];
+        for (int i = 0 ; i < optionList.length; i++) {
+            migratoryOptions[i] = MigratoryOption.valueOf(optionList[i].toUpperCase(Locale.ENGLISH));
+        }
+
+        LOG.debug("Parsed {} into {}", options, migratoryOptions);
+        return migratoryOptions;
+    }
+
 
     /**
      * Executes this mojo.
