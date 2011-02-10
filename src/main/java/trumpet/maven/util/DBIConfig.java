@@ -20,4 +20,8 @@ public interface DBIConfig
     @Config({"${_dbi_name}password", "trumpet.default.password"})
     @DefaultNull
     String getDBPassword();
+
+    @Config({"${_dbi_name}tablespace", "trumpet.default.tablespace"})
+    @DefaultNull
+    String getDBTablespace();
 }

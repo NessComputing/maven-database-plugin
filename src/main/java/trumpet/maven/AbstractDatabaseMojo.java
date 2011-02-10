@@ -49,7 +49,7 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
      * @parameter expression="${manifest.url}"
      * @required
      */
-    private String manifestUrl;
+    protected String manifestUrl;
 
     /**
      * @parameter expression="${manifest.name}"
@@ -134,6 +134,11 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             public String getDBUrl() {
                 return dbUrl;
             }
+
+            @Override
+            public String getDBTablespace() {
+                return baseConfig.getDBTablespace();
+            }
         };
     }
 
@@ -151,28 +156,42 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         return new DBI(dbiConfig.getDBUrl(), dbiConfig.getDBUser(), dbiConfig.getDBPassword());
     }
 
-    protected List<String> expandDatabaseList(final String databases)
+    protected List<String> expandDatabaseList(final String databases) throws MojoExecutionException
     {
         final String [] databaseNames = StringUtils.stripAll(StringUtils.split(databases, ","));
         if (databaseNames == null) {
             return  Collections.<String>emptyList();
         }
-        if (databaseNames.length == 1 && databaseNames[0].equalsIgnoreCase("all")) {
-            final List<String> databaseList = Lists.newArrayList();
 
-            Configuration dbConfig = config.subset("trumpet.db");
-            for (Iterator<?> it = dbConfig.getKeys(); it.hasNext(); ) {
-                final String key = (String) it.next();
-                if (key.contains(".")) {
-                    continue;
-                }
-                databaseList.add(key);
-            }
-            return databaseList;
+        final List<String> availableDatabases = getAvailableDatabases();
+
+        if (databaseNames.length == 1 && databaseNames[0].equalsIgnoreCase("all")) {
+            return availableDatabases;
         }
         else {
+            for (String database : databaseNames) {
+                if (!availableDatabases.contains(database)) {
+                    throw new MojoExecutionException("Database " + database + " is unknown!");
+                }
+            }
+
             return Arrays.asList(databaseNames);
         }
+    }
+
+    protected List<String> getAvailableDatabases()
+    {
+        final List<String> databaseList = Lists.newArrayList();
+
+        Configuration dbConfig = config.subset("trumpet.db");
+        for (Iterator<?> it = dbConfig.getKeys(); it.hasNext(); ) {
+            final String key = (String) it.next();
+            if (key.contains(".")) {
+                continue;
+            }
+            databaseList.add(key);
+        }
+        return databaseList;
     }
 
     /**
