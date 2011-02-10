@@ -52,9 +52,8 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
 
     /**
      * @parameter expression="${manifest.url}"
-     * @required
      */
-    protected String manifestUrl;
+    protected String manifestUrl = "https://depot.trumpet.io/database/default";
 
     /**
      * @parameter expression="${manifest.name}"

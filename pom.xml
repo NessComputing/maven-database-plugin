@@ -16,6 +16,26 @@
         <version.maven>2.2.1</version.maven>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>build-release</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>trumpet.io.snapshot</id>
+                    <name>maven.trumpet.io-snapshots</name>
+                    <uniqueVersion>true</uniqueVersion>
+                    <url>http://maven.trumpet.io:8081/artifactory/plugins-snapshots-local</url>
+                </snapshotRepository>
+                <repository>
+                    <id>trumpet.io</id>
+                    <name>maven.trumpet.io-releases</name>
+                    <url>http://maven.trumpet.io:8081/artifactory/plugins-releases-local</url>
+                    <uniqueVersion>false</uniqueVersion>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>io.trumpet.components</groupId>

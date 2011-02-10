@@ -1,21 +1,21 @@
 package trumpet.maven.util;
 
 import org.skife.config.Config;
-import org.skife.config.DefaultNull;
+import org.skife.config.Default;
 
 public abstract class HttpAuthCredentials
 {
     @Config("http.login")
-    @DefaultNull
+    @Default("config")
     public String getLogin()
     {
-        return null;
+        return "config";
     }
 
     @Config("http.password")
-    @DefaultNull
+    @Default("verysecret")
     public String getPassword()
     {
-        return null;
+        return "verysecret";
     }
 }

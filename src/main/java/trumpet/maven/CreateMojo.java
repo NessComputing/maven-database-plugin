@@ -24,6 +24,8 @@ import trumpet.maven.util.TemplatingStatementLocator;
 /**
  * Maven goal that creates all databases.
  *
+ * @aggregator true
+ * @requiresProject false
  * @goal create
  */
 public class CreateMojo extends AbstractDatabaseMojo

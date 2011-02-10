@@ -17,7 +17,8 @@ import trumpet.maven.util.DBIConfig;
 /**
  * Maven goal that drops all database objects.
  *
- * @phase pre-integration-test
+ * @aggregator true
+ * @requiresProject false
  * @goal clean
  */
 public class CleanMojo extends AbstractDatabaseMojo

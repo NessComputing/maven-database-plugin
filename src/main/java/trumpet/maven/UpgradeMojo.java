@@ -26,6 +26,8 @@ import com.google.common.collect.Maps;
 /**
  * Maven goal that upgrades all databases.
  *
+ * @aggregator true
+ * @requiresProject false
  * @goal upgrade
  */
 public class UpgradeMojo extends AbstractDatabaseMojo

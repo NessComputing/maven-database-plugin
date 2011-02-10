@@ -20,6 +20,8 @@ import trumpet.maven.util.TemplatingStatementLocator;
 /**
  * Maven goal that drops all databases.
  *
+ * @aggregator true
+ * @requiresProject false
  * @goal drop
  */
 public class DropMojo extends AbstractDatabaseMojo
