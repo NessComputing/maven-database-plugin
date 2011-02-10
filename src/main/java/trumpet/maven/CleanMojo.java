@@ -11,6 +11,8 @@ import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import trumpet.maven.util.DBIConfig;
+
 
 /**
  * Maven goal that drops all database objects.
@@ -41,11 +43,13 @@ public class CleanMojo extends AbstractDatabaseMojo
         for (String database : databaseList) {
             LOG.info("Cleaning Database {}...", database);
 
+            final DBIConfig databaseConfig = getDBIConfigFor(database);
+            final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
             final DBI dbi = getDBIFor(database);
             final MigratoryConfig config = factory.build(MigratoryConfig.class);
 
             try {
-                Migratory migratory = new Migratory(config, dbi);
+                Migratory migratory = new Migratory(config, dbi, rootDbDbi);
                 migratory.dbClean();
             }
             catch (MigratoryException me) {

@@ -63,32 +63,23 @@ public class UpgradeMojo extends AbstractDatabaseMojo
 
             final DBIConfig databaseConfig = getDBIConfigFor(databaseName);
             final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
+            final DBI dbi = getDBIFor(databaseName);
 
             try {
-                final MigrationPlan rootMigrationPlan  = createMigrationPlan(database, true);
+                final MigrationPlan rootMigrationPlan  = createMigrationPlan(database);
                 if (!rootMigrationPlan.isEmpty()) {
-                    LOG.info("Migrating {} as root user ...", databaseName);
+                    LOG.info("Migrating {} ...", databaseName);
 
-                    Migratory migratory = new Migratory(config, rootDbDbi);
+                    Migratory migratory = new Migratory(config, dbi, rootDbDbi);
                     migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                     migratory.dbMigrate(rootMigrationPlan);
                 }
-
-                final MigrationPlan migrationPlan  = createMigrationPlan(database, false);
-                if (!migrationPlan.isEmpty()) {
-                    LOG.info("Migrating {} as schema owner ...", databaseName);
-                    final DBI dbi = getDBIFor(databaseName);
-
-                    Migratory migratory = new Migratory(config, dbi);
-                    migratory.addLocator(new MojoLocator(migratory, manifestUrl));
-                    migratory.dbMigrate(migrationPlan);
-                }
             }
             catch (MigratoryException me) {
-                LOG.warn("While creating {}: {}", databaseName, me);
+                LOG.warn(String.format("While creating '%s': %s, Reason: %s", databaseName, me.getMessage(), me.getReason()));
             }
+            LOG.info("... done");
         }
-        LOG.info("... done");
     }
 
     protected Map<String, String> extractDatabases(final String migrations)throws MojoExecutionException
@@ -124,7 +115,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
         return databases;
     }
 
-    protected MigrationPlan createMigrationPlan(final Map.Entry<String, String> database, boolean rootPlan) throws MojoExecutionException
+    protected MigrationPlan createMigrationPlan(final Map.Entry<String, String> database) throws MojoExecutionException
     {
         final Map<String, MigrationInformation> availableMigrations = getAvailableMigrations(database.getKey());
 
@@ -134,9 +125,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
         final String migrations = database.getValue();
         if (StringUtils.isEmpty(migrations)) {
             for (MigrationInformation availableMigration : availableMigrations.values()) {
-                if (rootPlan == availableMigration.isRootMigration()) {
-                    migrationPlan.addMigration(availableMigration.getName(), Integer.MAX_VALUE, availableMigration.getPriority());
-                }
+                migrationPlan.addMigration(availableMigration.getName(), Integer.MAX_VALUE, availableMigration.getPriority());
             }
 
             return migrationPlan; // No
@@ -159,9 +148,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
                 throw new MojoExecutionException("Migration " + migrationName + " is unknown!");
             }
 
-            if (rootPlan == migrationInformation.isRootMigration()) {
-                migrationPlan.addMigration(migrationInformation.getName(), targetVersion, migrationInformation.getPriority());
-            }
+            migrationPlan.addMigration(migrationInformation.getName(), targetVersion, migrationInformation.getPriority());
         }
 
         return migrationPlan;
@@ -188,14 +175,10 @@ public class UpgradeMojo extends AbstractDatabaseMojo
             }
 
             if (personalityParts.length == 1) {
-                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], 0, false));
+                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], 0));
             }
             else {
-                boolean rootMigration = personalityParts[1].startsWith("R");
-                final String versionString = rootMigration ? personalityParts[1].substring(1) : personalityParts[1];
-
-                int priority = versionString.isEmpty() ? 0 : Integer.parseInt(versionString, 10);
-                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], priority, rootMigration));
+                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], Integer.parseInt(personalityParts[1], 10)));
             }
         }
     }
@@ -204,13 +187,11 @@ public class UpgradeMojo extends AbstractDatabaseMojo
     {
         private final String name;
         private final int priority;
-        private final boolean rootMigration;
 
-        public MigrationInformation(final String name, final int priority, final boolean rootMigration)
+        public MigrationInformation(final String name, final int priority)
         {
             this.name = name;
             this.priority = priority;
-            this.rootMigration = rootMigration;
         }
 
         public String getName()
@@ -221,11 +202,6 @@ public class UpgradeMojo extends AbstractDatabaseMojo
         public int getPriority()
         {
             return priority;
-        }
-
-        public boolean isRootMigration()
-        {
-            return rootMigration;
         }
     }
 }
