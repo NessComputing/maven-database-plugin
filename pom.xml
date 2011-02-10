@@ -5,8 +5,8 @@
         <artifactId>base</artifactId>
         <version>5.1</version>
     </parent>
-    <groupId>trumpet.maven</groupId>
-    <artifactId>database-maven-plugin</artifactId>
+    <groupId>io.trumpet.maven</groupId>
+    <artifactId>maven-database-plugin</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
