@@ -29,3 +29,7 @@ detect_user() ::= <<
 detect_database() ::= <<
    SELECT count(*) FROM pg_database WHERE datname=:database;
 >>
+
+detect_tablespace() ::= <<
+  SELECT count(*) FROM pg_tablespace WHERE spcname=:table_space;
+>>

@@ -109,26 +109,30 @@ public class CreateMojo extends AbstractDatabaseMojo
                     else {
                         LOG.info("... creating Database {}...", database);
 
-                        String tablespaceName = databaseConfig.getDBTablespace();
+                        final String tablespace;
 
-                        if (tablespaceName != null) {
+                        if (databaseConfig.getDBTablespace() != null) {
                             boolean tablespaceExists = rootDbi.withHandle(new HandleCallback<Boolean>() {
                                 @Override
                                 public Boolean withHandle(final Handle handle) {
                                     return handle.createQuery("#mojo:detect_tablespace")
-                                    .bind("database", database)
+                                    .bind("table_space", databaseConfig.getDBTablespace())
                                     .map(IntegerMapper.FIRST)
                                     .first() != 0;
                                 }
                             });
 
-                            if (!tablespaceExists) {
-                                LOG.warn("Tablespace '" + tablespaceName + "' does not exist, falling back to default!");
-                                tablespaceName = null;
+                            if (tablespaceExists) {
+                                tablespace = databaseConfig.getDBTablespace();
+                            }
+                            else {
+                                LOG.warn("Tablespace '" + databaseConfig.getDBTablespace() + "' does not exist, falling back to default!");
+                                tablespace = null;
                             }
                         }
-
-                        final String tablespace = tablespaceName;
+                        else {
+                            tablespace = null;
+                        }
 
                         rootDbi.withHandle(new HandleCallback<Void>() {
                             @Override
