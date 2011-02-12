@@ -109,13 +109,34 @@ public class CreateMojo extends AbstractDatabaseMojo
                     else {
                         LOG.info("... creating Database {}...", database);
 
+                        String tablespaceName = databaseConfig.getDBTablespace();
+
+                        if (tablespaceName != null) {
+                            boolean tablespaceExists = rootDbi.withHandle(new HandleCallback<Boolean>() {
+                                @Override
+                                public Boolean withHandle(final Handle handle) {
+                                    return handle.createQuery("#mojo:detect_tablespace")
+                                    .bind("database", database)
+                                    .map(IntegerMapper.FIRST)
+                                    .first() != 0;
+                                }
+                            });
+
+                            if (!tablespaceExists) {
+                                LOG.warn("Tablespace '" + tablespaceName + "' does not exist, falling back to default!");
+                                tablespaceName = null;
+                            }
+                        }
+
+                        final String tablespace = tablespaceName;
+
                         rootDbi.withHandle(new HandleCallback<Void>() {
                             @Override
                             public Void withHandle(final Handle handle) {
                                 handle.createStatement("#mojo:create_database")
                                 .define("database", database)
                                 .define("owner", databaseConfig.getDBUser())
-                                .define("tablespace", databaseConfig.getDBTablespace())
+                                .define("tablespace", tablespace)
                                 .execute();
                                 return null;
                             }
