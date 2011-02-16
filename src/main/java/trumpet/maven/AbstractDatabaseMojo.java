@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.configuration.CombinedConfiguration;
 import org.apache.commons.configuration.Configuration;
@@ -34,6 +35,7 @@ import trumpet.maven.util.HttpLoader;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.pyx4j.log4j.MavenLogAppender;
 
 public abstract class AbstractDatabaseMojo extends AbstractMojo
@@ -51,12 +53,12 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     protected MigratoryOption [] optionList;
 
     /**
-     * @parameter expression="${manifest.url}"
+     * @parameter expression="${manifest.url}" default-value="https://depot.trumpet.io/database/default"
      */
     protected String manifestUrl = "https://depot.trumpet.io/database/default";
 
     /**
-     * @parameter expression="${manifest.name}"
+     * @parameter expression="${manifest.name}" default-value="development"
      */
     private String manifestName = "development";
 
@@ -122,6 +124,13 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             MavenLogAppender.endPluginLog(this);
         }
     }
+
+
+
+    /**
+     * Executes this mojo.
+     */
+    protected abstract void doExecute() throws Exception;
 
     protected DBIConfig getDBIConfig(final String prefix)
     {
@@ -233,8 +242,54 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     }
 
 
-    /**
-     * Executes this mojo.
-     */
-    protected abstract void doExecute() throws Exception;
+    protected Map<String, MigrationInformation> getAvailableMigrations(final String database) throws MojoExecutionException
+    {
+        final Map<String, MigrationInformation> availableMigrations = Maps.newHashMap();
+
+        addMigrations("trumpet.db." + database, availableMigrations);
+        addMigrations("trumpet.default.personalities", availableMigrations);
+
+        return availableMigrations;
+    }
+
+    protected void addMigrations(final String property, final Map<String, MigrationInformation> availableMigrations) throws MojoExecutionException
+    {
+        final String [] personalities = StringUtils.stripAll(config.getStringArray(property));
+        for (String personality : personalities) {
+            final String [] personalityParts = StringUtils.stripAll(StringUtils.split(personality, ":"));
+
+            if (personalityParts == null || personalityParts.length < 1 || personalityParts.length > 2) {
+                throw new MojoExecutionException("Personality " + personality + " is invalid.");
+            }
+
+            if (personalityParts.length == 1) {
+                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], 0));
+            }
+            else {
+                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], Integer.parseInt(personalityParts[1], 10)));
+            }
+        }
+    }
+
+    protected static class MigrationInformation
+    {
+        private final String name;
+        private final int priority;
+
+        public MigrationInformation(final String name, final int priority)
+        {
+            this.name = name;
+            this.priority = priority;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public int getPriority()
+        {
+            return priority;
+        }
+    }
 }

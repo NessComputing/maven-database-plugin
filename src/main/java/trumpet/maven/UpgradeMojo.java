@@ -157,56 +157,5 @@ public class UpgradeMojo extends AbstractDatabaseMojo
 
         return migrationPlan;
     }
-
-    protected Map<String, MigrationInformation> getAvailableMigrations(final String database) throws MojoExecutionException
-    {
-        final Map<String, MigrationInformation> availableMigrations = Maps.newHashMap();
-
-        addMigrations("trumpet.db." + database, availableMigrations);
-        addMigrations("trumpet.default.personalities", availableMigrations);
-
-        return availableMigrations;
-    }
-
-    protected void addMigrations(final String property, final Map<String, MigrationInformation> availableMigrations) throws MojoExecutionException
-    {
-        final String [] personalities = StringUtils.stripAll(config.getStringArray(property));
-        for (String personality : personalities) {
-            final String [] personalityParts = StringUtils.stripAll(StringUtils.split(personality, ":"));
-
-            if (personalityParts == null || personalityParts.length < 1 || personalityParts.length > 2) {
-                throw new MojoExecutionException("Personality " + personality + " is invalid.");
-            }
-
-            if (personalityParts.length == 1) {
-                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], 0));
-            }
-            else {
-                availableMigrations.put(personalityParts[0], new MigrationInformation(personalityParts[0], Integer.parseInt(personalityParts[1], 10)));
-            }
-        }
-    }
-
-    private static class MigrationInformation
-    {
-        private final String name;
-        private final int priority;
-
-        public MigrationInformation(final String name, final int priority)
-        {
-            this.name = name;
-            this.priority = priority;
-        }
-
-        public String getName()
-        {
-            return name;
-        }
-
-        public int getPriority()
-        {
-            return priority;
-        }
-    }
 }
 
