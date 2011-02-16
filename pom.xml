@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.trumpet.maven</groupId>
         <artifactId>base</artifactId>
-        <version>5.1</version>
+        <version>6.0</version>
     </parent>
     <groupId>io.trumpet.mojo</groupId>
     <artifactId>maven-database-plugin</artifactId>
@@ -47,6 +47,18 @@
             <groupId>io.trumpet.migratory</groupId>
             <artifactId>migratory-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- maven -->
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>${version.maven}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+            <version>${version.maven}</version>
         </dependency>
 
         <!-- 3rd party -->
@@ -96,33 +108,6 @@
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.0-801.jdbc4</version>
-        </dependency>
-
-        <!-- maven -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-plugin-api</artifactId>
-            <version>${version.maven}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-artifact</artifactId>
-            <version>${version.maven}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-project</artifactId>
-            <version>${version.maven}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>${version.maven}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-core</artifactId>
-            <version>${version.maven}</version>
         </dependency>
     </dependencies>
 
