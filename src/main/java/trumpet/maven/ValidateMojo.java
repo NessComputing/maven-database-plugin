@@ -44,9 +44,9 @@ public class ValidateMojo extends AbstractDatabaseMojo
             throw new MojoExecutionException("No permission to run this task!");
         }
 
-        LOG.info(FRAME);
+        LOG.info(HEAD_FRAME);
         LOG.info(HEADER);
-        LOG.info(FRAME);
+        LOG.info(HEAD_FRAME);
 
         for (String database : databaseList) {
 
@@ -64,7 +64,7 @@ public class ValidateMojo extends AbstractDatabaseMojo
                 final Map<String, ValidationResult> results = migratory.dbValidate(availableMigrations.keySet(), optionList);
 
                 dump(database, results);
-                LOG.info(FRAME);
+                LOG.info(HEAD_FRAME);
             }
             catch (MigratoryException me) {
                 LOG.warn("While validaing for {}: {}", database, me);
@@ -75,9 +75,14 @@ public class ValidateMojo extends AbstractDatabaseMojo
         }
     }
 
-    private static final String FRAME  = "+---------------------------+---------------------------+----------------------+----------------------------------------------------+";
-    private static final String HEADER = "|         Database          |        Personality        |     State/Problem    | Reason                                             |";
-    private static final String BODY   = "| %-25s | %-25s | %-20s | %50s |";
+    private static final String FRAME      = "+----------------------+----+---------------------------+---------+--+---------------------------------------+";
+    private static final String HEAD_FRAME = "+---------------------------+---------------------------+------------+---------------------------------------+";
+    private static final String HEADER     = "|         Database          |        Personality        |    State   |                                       |";
+
+    private static final String PROB_FRAME = "+----------------------+------------------------------------------+------------------------------------------+";
+    private static final String PROBLEM    = "|        Problem       | Script                                   |                  Reason                  |";
+    private static final String BODY       = "| %-25s | %-25s | %-10s |                                       |";
+    private static final String PROBLEM_BODY   = "| %-20s | %-40s | %-40s |";
 
     public static void dump(final String database, final Map<String, ValidationResult> results)
     {
@@ -89,20 +94,27 @@ public class ValidateMojo extends AbstractDatabaseMojo
             final String personalityName = result.getKey();
             final ValidationResult validationResult = result.getValue();
 
+            final List<ValidationResultProblem> problems = validationResult.getProblems();
+            if (!problems.isEmpty()) {
+                LOG.info(HEAD_FRAME);
+            }
+
             LOG.info(String.format(BODY,
                                    database,
                                    personalityName,
-                                   validationResult.getValidationStatus(),
-                                   ""));
+                                   validationResult.getValidationStatus()));
 
-            final List<ValidationResultProblem> problems = validationResult.getProblems();
-            for (ValidationResultProblem problem: problems) {
-                LOG.info(String.format(BODY,
-                                       "",
-                                       "",
-                                       problem.getValidationStatus(),
-                                       problem.getReason()
-                             ));
+            if (!problems.isEmpty()) {
+                LOG.info(FRAME);
+                LOG.info(PROBLEM);
+                LOG.info(PROB_FRAME);
+                for (ValidationResultProblem problem: problems) {
+                    LOG.info(String.format(PROBLEM_BODY,
+                                           problem.getValidationStatus(),
+                                           problem.getMetadataInfo().getScriptName(),
+                                           problem.getReason()));
+                }
+                LOG.info(FRAME);
             }
         }
     }
