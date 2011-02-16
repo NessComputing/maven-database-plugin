@@ -67,6 +67,8 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
      */
     private String options;
 
+    protected HttpLoader httpLoader = null;
+
 
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException
@@ -74,12 +76,14 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         MavenLogAppender.startPluginLog(this);
 
         try {
+            httpLoader = new HttpLoader(Charsets.UTF_8);
+
             LOG.debug("Manifest URL: {}", manifestUrl);
             LOG.debug("Manifest Name: {}", manifestName);
 
             loaderManager.addLoader(new FileLoader(Charsets.UTF_8));
             loaderManager.addLoader(new JarLoader(Charsets.UTF_8));
-            loaderManager.addLoader(new HttpLoader(Charsets.UTF_8));
+            loaderManager.addLoader(httpLoader);
 
             this.optionList = parseOptions(options);
 
@@ -121,6 +125,10 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             throw new MojoExecutionException("Failure:" ,e);
         }
         finally {
+            if (httpLoader != null) {
+                httpLoader.close();
+            }
+
             MavenLogAppender.endPluginLog(this);
         }
     }

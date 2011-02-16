@@ -17,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
-import trumpet.maven.util.HttpLoader;
 import trumpet.maven.util.MojoLocator;
-
-import com.google.common.base.Charsets;
 
 
 /**
@@ -66,7 +63,7 @@ public class HistoryMojo extends AbstractDatabaseMojo
 
             try {
                 final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
-                migratory.addLoader(new HttpLoader(Charsets.UTF_8));
+                migratory.addLoader(httpLoader);
                 migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                 final Map<String, List<MetadataInfo>> results = migratory.dbHistory(availableMigrations.keySet(), optionList);
 

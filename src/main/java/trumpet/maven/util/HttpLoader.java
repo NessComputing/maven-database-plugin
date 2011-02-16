@@ -36,6 +36,9 @@ public class HttpLoader implements MigrationLoader
 
     private final ContentResponseHandler<String> responseHandler = new ContentResponseHandler<String>(new StringConverter());
 
+    private final HttpClient httpClient;
+
+
     public HttpLoader(final Charset charset)
     {
         final ConfigurationObjectFactory objectFactory = new ConfigurationObjectFactory(new SimplePropertyConfigSource(System.getProperties()));
@@ -43,6 +46,12 @@ public class HttpLoader implements MigrationLoader
         this.charset = charset;
         this.httpClientDefaults = objectFactory.build(HttpClientDefaults.class);
         this.authCredentials = objectFactory.build(HttpAuthCredentials.class);
+        this.httpClient  = new HttpClient(httpClientDefaults);
+    }
+
+    public void close()
+    {
+        this.httpClient.close();
     }
 
     @Override
@@ -54,34 +63,28 @@ public class HttpLoader implements MigrationLoader
     @Override
     public String loadFile(final URI fileUri) throws IOException
     {
-        final HttpClient httpClient = new HttpClient(httpClientDefaults);
-
+        LOG.trace("Trying to load '%s'...", fileUri);
         try {
-            LOG.trace("Trying to load '%s'...", fileUri);
-            try {
-                final HttpClientRequest.Builder<String> req = httpClient.get(fileUri, responseHandler);
-                if (authCredentials.getLogin() != null && authCredentials.getPassword() != null) {
-                    req.addBasicAuth(authCredentials.getLogin(), authCredentials.getPassword());
-                }
+            final HttpClientRequest.Builder<String> req = httpClient.get(fileUri, responseHandler);
+            if (authCredentials.getLogin() != null && authCredentials.getPassword() != null) {
+                req.addBasicAuth(authCredentials.getLogin(), authCredentials.getPassword());
+            }
 
-                final String result = req.perform();
-                if (result != null) {
-                    LOG.trace("... succeeded");
-                    return result;
-                }
-                else {
-                    LOG.trace("... not found");
-                }
+            final String result = req.perform();
+            if (result != null) {
+                LOG.trace("... succeeded");
+                return result;
             }
-            catch (IOException ioe) {
-                LOG.trace("... failed", ioe);
+            else {
+                LOG.trace("... not found");
             }
-            return null;
         }
-        finally {
-            httpClient.close();
+        catch (IOException ioe) {
+            LOG.trace("... failed", ioe);
         }
+        return null;
     }
+
 
     @Override
     public Collection<URI> loadFolder(final URI folderUri, final String searchPattern) throws IOException
