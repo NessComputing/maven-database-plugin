@@ -12,6 +12,11 @@
     <packaging>maven-plugin</packaging>
     <name>${project.artifactId}</name>
 
+    <scm>
+        <connection>scm:hg:ssh://hg@hg.trumpet.io/code/tools/trumpet-database-maven-plugin</connection>
+        <developerConnection>scm:hg:ssh://hg@hg.trumpet.io/code/tools/trumpet-database-maven-plugin</developerConnection>
+    </scm>
+
     <properties>
         <version.maven>2.2.1</version.maven>
     </properties>
@@ -46,7 +51,7 @@
         <dependency>
             <groupId>io.trumpet.migratory</groupId>
             <artifactId>migratory-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- maven -->
