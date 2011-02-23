@@ -40,6 +40,10 @@ import com.pyx4j.log4j.MavenLogAppender;
 
 public abstract class AbstractDatabaseMojo extends AbstractMojo
 {
+    private static final String [] MUST_EXIST = new String [] { "trumpet.default.base", "trumpet.default.root_url", "trumpet.default.root_user", "trumpet.default.root_password", "trumpet.default.user", "trumpet.default.password" };
+    private static final String [] MUST_NOT_BE_EMPTY = new String [] { "trumpet.default.base", "trumpet.default.root_url", "trumpet.default.root_user", "trumpet.default.user" };
+
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDatabaseMojo.class);
 
     protected DBIConfig rootDBIConfig;
@@ -111,6 +115,10 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             final PropertiesConfiguration pc = new PropertiesConfiguration();
             pc.load(new StringReader(contents));
             config.addConfiguration(pc);
+
+            if (!validateConfiguration(config)) {
+                throw new MojoExecutionException("Manifest '" + manifestName + "' is not valid. Refusing to execute!");
+            }
 
             this.config = config;
             LOG.debug("Configuration now: {}", this.config);
@@ -299,5 +307,31 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         {
             return priority;
         }
+    }
+
+    private boolean validateConfiguration(Configuration config) throws MojoExecutionException
+    {
+        boolean valid = true;
+        for (String mustExist : MUST_EXIST) {
+            if (!config.containsKey(mustExist)) {
+                LOG.error("The required property '{}' does not exist in the manifest.", mustExist);
+                valid = false;
+}
+        }
+
+        for (String mustNotBeEmpty : MUST_NOT_BE_EMPTY) {
+            if (StringUtils.isBlank(config.getString(mustNotBeEmpty, null))) {
+                LOG.error("The property '{}' must not be empty.", mustNotBeEmpty);
+                valid = false;
+            }
+        }
+
+        final String defaultBase = config.getString("trumpet.default.base", "");
+        if (defaultBase.indexOf("%s") == -1 || defaultBase.indexOf("%s") != defaultBase.lastIndexOf("%s")) {
+            LOG.error("The 'config.default.base' property must contain exactly one '%s' place holder!");
+            valid = false;
+        }
+
+        return valid;
     }
 }
