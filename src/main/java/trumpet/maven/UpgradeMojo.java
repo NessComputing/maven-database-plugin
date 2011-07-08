@@ -55,9 +55,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
         }
 
         final Map<String, String> databases = extractDatabases(migrations);
-        final MigratoryConfig config = factory.build(MigratoryConfig.class);
-
-
+        final MigratoryConfig config = new TrumpetSpecificDelegatingMigratoryConfig(factory.build(MigratoryConfig.class));
 
         for (Map.Entry<String, String> database : databases.entrySet()) {
             final String databaseName = database.getKey();
@@ -72,7 +70,6 @@ public class UpgradeMojo extends AbstractDatabaseMojo
                     LOG.info("Migrating {} ...", databaseName);
 
                     Migratory migratory = new Migratory(config, dbi, rootDbDbi);
-                    migratory.addLoader(httpLoader);
                     migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                     migratory.dbMigrate(rootMigrationPlan, optionList);
                 }

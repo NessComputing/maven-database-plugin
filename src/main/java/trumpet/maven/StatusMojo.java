@@ -60,7 +60,6 @@ public class StatusMojo extends AbstractDatabaseMojo
 
             try {
                 final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
-                migratory.addLoader(httpLoader);
                 migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                 final Map<String, StatusResult> results = migratory.dbStatus(availableMigrations.keySet(), optionList);
 

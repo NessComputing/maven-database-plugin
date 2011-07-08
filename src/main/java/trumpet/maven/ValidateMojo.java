@@ -59,7 +59,6 @@ public class ValidateMojo extends AbstractDatabaseMojo
 
             try {
                 final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
-                migratory.addLoader(httpLoader);
                 migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                 final Map<String, ValidationResult> results = migratory.dbValidate(availableMigrations.keySet(), optionList);
 

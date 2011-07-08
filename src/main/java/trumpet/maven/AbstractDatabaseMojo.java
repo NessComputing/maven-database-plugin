@@ -1,7 +1,9 @@
 package trumpet.maven;
 
+import io.trumpet.migratory.MigratoryConfig;
 import io.trumpet.migratory.MigratoryOption;
 import io.trumpet.migratory.loader.FileLoader;
+import io.trumpet.migratory.loader.HttpLoader;
 import io.trumpet.migratory.loader.JarLoader;
 import io.trumpet.migratory.loader.LoaderManager;
 
@@ -25,12 +27,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.skife.config.CommonsConfigSource;
 import org.skife.config.ConfigurationObjectFactory;
+import org.skife.config.SimplePropertyConfigSource;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
-import trumpet.maven.util.HttpLoader;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -71,23 +73,24 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
      */
     private String options;
 
-    protected HttpLoader httpLoader = null;
-
-
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException
     {
         MavenLogAppender.startPluginLog(this);
 
         try {
-            httpLoader = new HttpLoader(Charsets.UTF_8);
-
             LOG.debug("Manifest URL: {}", manifestUrl);
             LOG.debug("Manifest Name: {}", manifestName);
 
+            // This config object is only used for the Http Loader, so that login and pw
+            // can be provided using plugin parameters.
+            final ConfigurationObjectFactory systemFactory = new ConfigurationObjectFactory(new SimplePropertyConfigSource(System.getProperties()));
+
+            final MigratoryConfig migratoryConfig = new TrumpetSpecificDelegatingMigratoryConfig(systemFactory.build(MigratoryConfig.class));
+
             loaderManager.addLoader(new FileLoader(Charsets.UTF_8));
             loaderManager.addLoader(new JarLoader(Charsets.UTF_8));
-            loaderManager.addLoader(httpLoader);
+            loaderManager.addLoader(new HttpLoader(migratoryConfig));
 
             this.optionList = parseOptions(options);
 
@@ -133,10 +136,6 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             throw new MojoExecutionException("Failure:" ,e);
         }
         finally {
-            if (httpLoader != null) {
-                httpLoader.close();
-            }
-
             MavenLogAppender.endPluginLog(this);
         }
     }
