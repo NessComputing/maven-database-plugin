@@ -192,7 +192,7 @@ public class CreateMojo extends AbstractDatabaseMojo
                     // Finally metadata is created as the database owner connected to the database.
 
                     final DBI dbi = getDBIFor(database);
-                    final MigratoryConfig config = factory.build(MigratoryConfig.class);
+                    final MigratoryConfig config = getMigratoryConfig();
 
                     Migratory migratory = new Migratory(config, dbi);
                     migratory.dbInit();

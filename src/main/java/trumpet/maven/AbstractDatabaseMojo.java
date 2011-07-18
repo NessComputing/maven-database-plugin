@@ -52,7 +52,7 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
 
     protected Configuration config;
 
-    protected ConfigurationObjectFactory factory;
+    private ConfigurationObjectFactory factory;
 
     protected final LoaderManager loaderManager = new LoaderManager();
 
@@ -150,6 +150,11 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     protected DBIConfig getDBIConfig(final String prefix)
     {
         return factory.buildWithReplacements(DBIConfig.class, ImmutableMap.of("_dbi_name", prefix));
+    }
+
+    protected MigratoryConfig getMigratoryConfig()
+    {
+        return new TrumpetSpecificDelegatingMigratoryConfig(factory.build(MigratoryConfig.class));
     }
 
     protected DBIConfig getDBIConfigFor(final String database)

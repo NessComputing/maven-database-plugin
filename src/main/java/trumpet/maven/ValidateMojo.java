@@ -55,7 +55,7 @@ public class ValidateMojo extends AbstractDatabaseMojo
             final DBIConfig databaseConfig = getDBIConfigFor(database);
             final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
             final DBI dbi = getDBIFor(database);
-            final MigratoryConfig config = factory.build(MigratoryConfig.class);
+            final MigratoryConfig config = getMigratoryConfig();
 
             try {
                 final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
