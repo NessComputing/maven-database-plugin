@@ -3,7 +3,7 @@
   <parent>
     <groupId>io.trumpet.maven</groupId>
     <artifactId>base</artifactId>
-    <version>24</version>
+    <version>28</version>
   </parent>
   <groupId>io.trumpet.mojo</groupId>
   <artifactId>maven-database-plugin</artifactId>
@@ -21,7 +21,7 @@
     <dependency>
       <groupId>io.trumpet.migratory</groupId>
       <artifactId>migratory-core</artifactId>
-      <version>2.0.1</version>
+      <version>2.1.0</version>
     </dependency>
 
     <!-- maven -->
@@ -79,7 +79,7 @@
     <dependency>
       <groupId>org.jdbi</groupId>
       <artifactId>jdbi</artifactId>
-      <version>2.27</version>
+      <version>2.30</version>
     </dependency>
 
     <dependency>
