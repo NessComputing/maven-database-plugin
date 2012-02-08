@@ -18,6 +18,14 @@ create_user(user, password) ::= <<
   CREATE ROLE <user> PASSWORD '<password>' LOGIN;
 >>
 
+create_schema(schema_name) ::= <<
+  CREATE SCHEMA AUTHORIZATION <schema_name>;
+>>
+
+drop_schema(schema_name) ::= <<
+  DROP SCHEMA <schema_name> CASCADE;
+>>
+
 detect_language() ::= <<
    SELECT count(*) FROM pg_language WHERE lanname='plpgsql';
 >>
@@ -32,4 +40,8 @@ detect_database() ::= <<
 
 detect_tablespace() ::= <<
   SELECT count(*) FROM pg_tablespace WHERE spcname=:table_space;
+>>
+
+detect_schema() ::= <<
+  SELECT count(*) FROM pg_namespace WHERE nspname=:schema_name;
 >>

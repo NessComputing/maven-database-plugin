@@ -53,10 +53,13 @@ public class CreateMojo extends AbstractDatabaseMojo
         final StatementLocator statementLocator = new TemplatingStatementLocator("/sql/", loaderManager);
         rootDbi.setStatementLocator(statementLocator);
 
-
         for (final String database : databaseList) {
             final DBIConfig databaseConfig = getDBIConfigFor(database);
             final String user = databaseConfig.getDBUser();
+
+            // Language and schema creation runs as root user, but connected to the actual database.
+            final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
+            rootDbDbi.setStatementLocator(statementLocator);
 
             if (MigratoryOption.containsOption(MigratoryOption.DRY_RUN, optionList)) {
                 LOG.info("Dry run for database {} activated!", database);
@@ -146,16 +149,13 @@ public class CreateMojo extends AbstractDatabaseMojo
                             }
                         });
                     }
+
                 }
                 catch (DBIException de) {
                     LOG.warn("While creating {}: {}", database, de);
                 }
 
                 try {
-                    // Language creation runs as root user, but connected to the actual database.
-                    final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
-                    rootDbDbi.setStatementLocator(statementLocator);
-
                     boolean languageExists = rootDbDbi.withHandle(new HandleCallback<Boolean>() {
                         @Override
                         public Boolean withHandle(final Handle handle) {
@@ -186,6 +186,63 @@ public class CreateMojo extends AbstractDatabaseMojo
                     LOG.warn("While creating {}: {}", database, de);
                 }
 
+                final boolean createSchema = config.getBoolean("trumpet.schema.create", false);
+
+                if (createSchema) {
+                    final String schemaName = databaseConfig.getDBUser();
+                    try {
+                        if (detectSchema(rootDbDbi, schemaName)) {
+                            LOG.trace("Schema {} exists", schemaName);
+                        }
+                        else {
+                            LOG.info("... creating Schema {} ...", schemaName);
+
+                            rootDbDbi.withHandle(new HandleCallback<Void>() {
+                                @Override
+                                public Void withHandle(final Handle handle) {
+                                    handle.createStatement("#mojo:create_schema")
+                                    .define("schema_name", schemaName)
+                                    .execute();
+                                    return null;
+                                }
+                            });
+                        }
+                    }
+                    catch (DBIException de) {
+                        LOG.warn("While creating schema {}: {}", schemaName, de);
+                    }
+
+                    final boolean enforceSchema = config.getBoolean("trumpet.schema.enforce", false);
+
+                    if (enforceSchema) {
+                        try {
+                            if (!detectSchema(rootDbDbi, "public")) {
+                                LOG.trace("public schema does not exist");
+                            }
+                            else {
+                                LOG.info("... dropping public schema ...");
+
+                                rootDbDbi.withHandle(new HandleCallback<Void>() {
+                                    @Override
+                                    public Void withHandle(final Handle handle) {
+                                        handle.createStatement("#mojo:drop_schema")
+                                        .define("schema_name", "public")
+                                        .execute();
+                                        return null;
+                                    }
+                                });
+                            }
+                        }
+                        catch (DBIException de) {
+                            LOG.warn("While dropping public schema: {}", de);
+                        }
+                    }
+                }
+                else {
+                    LOG.info("... not creating schema ...");
+                }
+
+
                 try {
                     LOG.info("... initializing metadata ...");
 
@@ -206,5 +263,19 @@ public class CreateMojo extends AbstractDatabaseMojo
             }
             LOG.info("... done");
         }
+    }
+
+    private boolean detectSchema(final DBI dbi, final String schemaName)
+    {
+        return dbi.withHandle(new HandleCallback<Boolean>() {
+            @Override
+            public Boolean withHandle(final Handle handle) {
+                return handle.createQuery("#mojo:detect_schema")
+                .bind("schema_name", schemaName)
+                .map(IntegerMapper.FIRST)
+                .first() != 0;
+            }
+        });
+
     }
 }
