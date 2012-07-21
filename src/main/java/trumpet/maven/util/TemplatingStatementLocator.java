@@ -45,7 +45,7 @@ public class TemplatingStatementLocator implements StatementLocator
             final URL locationUrl = Resources.getResource(this.getClass(), location);
 
             if (locationUrl == null) {
-                throw new IllegalArgumentException("Location '" + locationUrl + "' does not exist!");
+                throw new IllegalArgumentException("Location '" + location + "' does not exist!");
             }
             final String contents = loaderManager.loadFile(locationUrl.toURI());
 
