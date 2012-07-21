@@ -1,12 +1,11 @@
 package trumpet.maven.util;
 
-import io.trumpet.migratory.MigratoryContext;
-import io.trumpet.migratory.locator.AbstractSqlResourceLocator;
-
 import java.net.URI;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.nesscomputing.migratory.MigratoryContext;
+import com.nesscomputing.migratory.locator.AbstractSqlResourceLocator;
 
 public class MojoLocator extends AbstractSqlResourceLocator
 {

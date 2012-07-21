@@ -1,11 +1,5 @@
 package trumpet.maven;
 
-import io.trumpet.migratory.Migratory;
-import io.trumpet.migratory.MigratoryConfig;
-import io.trumpet.migratory.MigratoryException;
-import io.trumpet.migratory.validation.ValidationResult;
-import io.trumpet.migratory.validation.ValidationResult.ValidationResultProblem;
-
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
 import trumpet.maven.util.MojoLocator;
+
+import com.nesscomputing.migratory.Migratory;
+import com.nesscomputing.migratory.MigratoryConfig;
+import com.nesscomputing.migratory.MigratoryException;
+import com.nesscomputing.migratory.validation.ValidationResult;
+import com.nesscomputing.migratory.validation.ValidationResult.ValidationResultProblem;
 
 
 /**

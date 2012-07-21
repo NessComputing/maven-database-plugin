@@ -1,8 +1,7 @@
 package trumpet.maven;
 
-import io.trumpet.migratory.MigratoryConfig;
-
 import com.google.common.base.Objects;
+import com.nesscomputing.migratory.MigratoryConfig;
 
 /**
  * This is Ness specific. Remove before opensourcing!

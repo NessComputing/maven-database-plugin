@@ -1,7 +1,5 @@
 package trumpet.maven;
 
-import io.trumpet.migratory.MigratoryOption;
-
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -15,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.TemplatingStatementLocator;
+
+import com.nesscomputing.migratory.MigratoryOption;
 
 
 /**

@@ -1,10 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>io.trumpet.maven</groupId>
-    <artifactId>base</artifactId>
-    <version>28</version>
+    <groupId>com.nesscomputing</groupId>
+    <artifactId>ness-oss-parent</artifactId>
+    <version>13</version>
   </parent>
+
   <groupId>io.trumpet.mojo</groupId>
   <artifactId>maven-database-plugin</artifactId>
   <version>3.2-SNAPSHOT</version>
@@ -13,15 +14,20 @@
   <name>${project.artifactId}</name>
 
   <scm>
-    <connection>scm:hg:ssh://hg@hg.trumpet.io/code/tools/trumpet-database-maven-plugin</connection>
-    <developerConnection>scm:hg:ssh://hg@hg.trumpet.io/code/tools/trumpet-database-maven-plugin</developerConnection>
+    <connection>scm:git:git://github.com/NessComputing/maven-database-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:NessComputing/maven-database-plugin.git</developerConnection>
+    <url>http://github.com/NessComputing/maven-database-plugin</url>
   </scm>
+
+  <properties>
+    <dep.ness.slf4j.version>1.6.6</dep.ness.slf4j.version>
+  </properties>
 
   <dependencies>
     <dependency>
-      <groupId>io.trumpet.migratory</groupId>
+      <groupId>com.nesscomputing.migratory</groupId>
       <artifactId>migratory-core</artifactId>
-      <version>2.1.0</version>
+      <version>3.1.1</version>
     </dependency>
 
     <!-- maven -->
@@ -85,12 +91,13 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>${dep.ness.slf4j.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.4</version>
+      <version>${dep.ness.slf4j.version}</version>
       <scope>runtime</scope>
     </dependency>
 
@@ -110,25 +117,44 @@
     <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
+      <version>9.1-902.jdbc4</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${dep.ness.slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!--
+      <build>
+      <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <configuration>
-          <rules>
-            <bannedDependencies>
-              <includes>
-                <include>org.slf4j:jcl-over-slf4j</include>
-              </includes>
-            </bannedDependencies>
-          </rules>
-        </configuration>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-enforcer-plugin</artifactId>
+      <configuration>
+      <rules>
+      <bannedDependencies>
+      <includes>
+      <include>org.slf4j:jcl-over-slf4j</include>
+      </includes>
+      </bannedDependencies>
+      </rules>
+      </configuration>
       </plugin>
-    </plugins>
-  </build>
+      </plugins>
+      </build>
+  -->
 </project>

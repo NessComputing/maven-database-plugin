@@ -1,9 +1,5 @@
 package trumpet.maven;
 
-import io.trumpet.migratory.Migratory;
-import io.trumpet.migratory.MigratoryConfig;
-import io.trumpet.migratory.MigratoryException;
-
 import java.util.List;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -12,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import trumpet.maven.util.DBIConfig;
+
+import com.nesscomputing.migratory.Migratory;
+import com.nesscomputing.migratory.MigratoryConfig;
+import com.nesscomputing.migratory.MigratoryException;
 
 
 /**

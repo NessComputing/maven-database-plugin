@@ -1,10 +1,5 @@
 package trumpet.maven.util;
 
-import io.trumpet.migratory.MigratoryException;
-import io.trumpet.migratory.MigratoryException.Reason;
-import io.trumpet.migratory.loader.LoaderManager;
-import io.trumpet.migratory.loader.MigrationLoader;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +8,10 @@ import java.util.Collection;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.nesscomputing.migratory.MigratoryException;
+import com.nesscomputing.migratory.MigratoryException.Reason;
+import com.nesscomputing.migratory.loader.LoaderManager;
+import com.nesscomputing.migratory.loader.MigrationLoader;
 
 /**
  * Loads a file from the classpath.

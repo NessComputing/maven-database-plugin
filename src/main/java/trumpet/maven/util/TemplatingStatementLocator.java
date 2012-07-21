@@ -1,7 +1,5 @@
 package trumpet.maven.util;
 
-import io.trumpet.migratory.loader.LoaderManager;
-
 import java.io.StringReader;
 import java.net.URL;
 
@@ -15,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Resources;
+import com.nesscomputing.migratory.loader.LoaderManager;
 
 public class TemplatingStatementLocator implements StatementLocator
 {

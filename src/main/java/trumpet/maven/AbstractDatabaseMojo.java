@@ -1,12 +1,5 @@
 package trumpet.maven;
 
-import io.trumpet.migratory.MigratoryConfig;
-import io.trumpet.migratory.MigratoryOption;
-import io.trumpet.migratory.loader.FileLoader;
-import io.trumpet.migratory.loader.HttpLoader;
-import io.trumpet.migratory.loader.JarLoader;
-import io.trumpet.migratory.loader.LoaderManager;
-
 import java.io.StringReader;
 import java.net.URI;
 import java.util.Arrays;
@@ -38,6 +31,12 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.nesscomputing.migratory.MigratoryConfig;
+import com.nesscomputing.migratory.MigratoryOption;
+import com.nesscomputing.migratory.loader.FileLoader;
+import com.nesscomputing.migratory.loader.HttpLoader;
+import com.nesscomputing.migratory.loader.JarLoader;
+import com.nesscomputing.migratory.loader.LoaderManager;
 import com.pyx4j.log4j.MavenLogAppender;
 
 public abstract class AbstractDatabaseMojo extends AbstractMojo
