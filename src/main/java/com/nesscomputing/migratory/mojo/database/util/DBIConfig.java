@@ -1,4 +1,4 @@
-package trumpet.maven.util;
+package com.nesscomputing.migratory.mojo.database.util;
 
 import org.skife.config.Config;
 import org.skife.config.DefaultNull;

@@ -1,4 +1,4 @@
-package trumpet.maven;
+package com.nesscomputing.migratory.mojo.database;
 
 import com.google.common.base.Objects;
 import com.nesscomputing.migratory.MigratoryConfig;

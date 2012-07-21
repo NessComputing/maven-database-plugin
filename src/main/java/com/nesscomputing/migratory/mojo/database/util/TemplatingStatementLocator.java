@@ -1,4 +1,4 @@
-package trumpet.maven.util;
+package com.nesscomputing.migratory.mojo.database.util;
 
 import java.io.StringReader;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package trumpet.maven.util;
+package com.nesscomputing.migratory.mojo.database.util;
 
 import java.net.URI;
 import java.util.Map;

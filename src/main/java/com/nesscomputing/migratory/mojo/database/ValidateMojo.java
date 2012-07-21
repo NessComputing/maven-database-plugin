@@ -1,4 +1,4 @@
-package trumpet.maven;
+package com.nesscomputing.migratory.mojo.database;
 
 import java.util.List;
 import java.util.Map;
@@ -8,12 +8,12 @@ import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import trumpet.maven.util.DBIConfig;
-import trumpet.maven.util.MojoLocator;
 
 import com.nesscomputing.migratory.Migratory;
 import com.nesscomputing.migratory.MigratoryConfig;
 import com.nesscomputing.migratory.MigratoryException;
+import com.nesscomputing.migratory.mojo.database.util.DBIConfig;
+import com.nesscomputing.migratory.mojo.database.util.MojoLocator;
 import com.nesscomputing.migratory.validation.ValidationResult;
 import com.nesscomputing.migratory.validation.ValidationResult.ValidationResultProblem;
 

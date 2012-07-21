@@ -1,4 +1,4 @@
-package trumpet.maven;
+package com.nesscomputing.migratory.mojo.database;
 
 import java.util.List;
 
@@ -12,9 +12,9 @@ import org.skife.jdbi.v2.util.IntegerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import trumpet.maven.util.TemplatingStatementLocator;
 
 import com.nesscomputing.migratory.MigratoryOption;
+import com.nesscomputing.migratory.mojo.database.util.TemplatingStatementLocator;
 
 
 /**

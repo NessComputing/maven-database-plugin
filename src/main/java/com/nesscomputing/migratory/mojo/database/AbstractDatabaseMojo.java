@@ -1,4 +1,4 @@
-package trumpet.maven;
+package com.nesscomputing.migratory.mojo.database;
 
 import java.io.StringReader;
 import java.net.URI;
@@ -25,7 +25,6 @@ import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import trumpet.maven.util.DBIConfig;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
@@ -37,6 +36,7 @@ import com.nesscomputing.migratory.loader.FileLoader;
 import com.nesscomputing.migratory.loader.HttpLoader;
 import com.nesscomputing.migratory.loader.JarLoader;
 import com.nesscomputing.migratory.loader.LoaderManager;
+import com.nesscomputing.migratory.mojo.database.util.DBIConfig;
 import com.pyx4j.log4j.MavenLogAppender;
 
 public abstract class AbstractDatabaseMojo extends AbstractMojo
