@@ -137,23 +137,29 @@
     </dependencies>
   </dependencyManagement>
 
-  <!--
-      <build>
-      <plugins>
+  <build>
+    <plugins>
       <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-enforcer-plugin</artifactId>
-      <configuration>
-      <rules>
-      <bannedDependencies>
-      <includes>
-      <include>org.slf4j:jcl-over-slf4j</include>
-      </includes>
-      </bannedDependencies>
-      </rules>
-      </configuration>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>2.9</version>
+        <executions>
+          <execution>
+            <id>help-mojo</id>
+            <goals>
+              <goal>helpmojo</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
-      </plugins>
-      </build>
-  -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <configuration>
+          <excludeFilterFile>${project.basedir}/src/tools/findbugsExclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
