@@ -128,6 +128,14 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
                 this.manifestName = initialConfig.getManifestName();
             }
 
+            if (manifestUrl == null) {
+                throw new MojoExecutionException("no manifest url found (did you create a .migratory.properties file?)");
+            }
+
+            if (manifestName == null) {
+                throw new MojoExecutionException("no manifest name found (did you create a .migratory.properties file?)");
+            }
+
             LOG.debug("Manifest URL:      {}", manifestUrl);
             LOG.debug("Manifest Name:     {}", manifestName);
 
@@ -167,7 +175,7 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
             }
 
             this.config = config;
-            final ConfigurationObjectFactory factory = new ConfigurationObjectFactory(new CommonsConfigSource(config));
+            this.factory = new ConfigurationObjectFactory(new CommonsConfigSource(config));
             this.migratoryConfig = factory.build(MigratoryConfig.class);
             this.loaderManager = createLoaderManager(migratoryConfig);
 
