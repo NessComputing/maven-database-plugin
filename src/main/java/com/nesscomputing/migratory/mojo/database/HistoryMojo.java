@@ -41,7 +41,7 @@ public class HistoryMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.history-db", true);
+        final boolean permission = config.getBoolean(getPropertyName("permission.history-db"), true);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }

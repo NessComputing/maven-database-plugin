@@ -34,7 +34,7 @@ public class CleanMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.clean-db", false);
+        final boolean permission = config.getBoolean(getPropertyName("permission.clean-db"), false);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }

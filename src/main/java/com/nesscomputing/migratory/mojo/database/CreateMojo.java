@@ -41,7 +41,7 @@ public class CreateMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.create-db", false);
+        final boolean permission = config.getBoolean(getPropertyName("permission.create-db"), false);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }
@@ -184,7 +184,7 @@ public class CreateMojo extends AbstractDatabaseMojo
                     LOG.warn("While creating {}: {}", database, de);
                 }
 
-                final boolean createSchema = config.getBoolean("trumpet.schema.create", false);
+                final boolean createSchema = config.getBoolean(getPropertyName("schema.create"), false);
 
                 if (createSchema) {
                     final String schemaName = databaseConfig.getDBUser();
@@ -210,7 +210,7 @@ public class CreateMojo extends AbstractDatabaseMojo
                         LOG.warn("While creating schema {}: {}", schemaName, de);
                     }
 
-                    final boolean enforceSchema = config.getBoolean("trumpet.schema.enforce", false);
+                    final boolean enforceSchema = config.getBoolean(getPropertyName("schema.enforce"), false);
 
                     if (enforceSchema) {
                         try {

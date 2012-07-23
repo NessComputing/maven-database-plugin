@@ -39,7 +39,7 @@ public class DropMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.drop-db", false);
+        final boolean permission = config.getBoolean(getPropertyName("permission.drop-db"), false);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }

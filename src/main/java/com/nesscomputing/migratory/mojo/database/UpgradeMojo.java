@@ -35,7 +35,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
      * all -> all databases, latest version. Default.
      * follow Migrate follow database to latest version.
      * oauth=oauth@4  : explicit version for a personality on a given db (all others are ignored)
-     * trumpet_test=oauth@4/prefs@2 Migrate two personalities of a given database.
+     * ness_test=oauth@4/prefs@2 Migrate two personalities of a given database.
      * follow=follow@4,prefs=prefs@7  Migrate two different databases.
      * follow=follow Migrate follow personality in the follow database to latest version
      *
@@ -46,7 +46,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
     @Override
     protected void doExecute() throws Exception
     {
-        final boolean permission = config.getBoolean("trumpet.permission.upgrade-db", false);
+        final boolean permission = config.getBoolean(getPropertyName("permission.upgrade-db"), false);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }

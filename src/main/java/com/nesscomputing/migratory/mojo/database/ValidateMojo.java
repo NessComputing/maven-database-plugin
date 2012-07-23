@@ -37,7 +37,7 @@ public class ValidateMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.validate-db", true);
+        final boolean permission = config.getBoolean(getPropertyName("permission.validate-db"), true);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }

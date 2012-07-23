@@ -38,7 +38,7 @@ public class StatusMojo extends AbstractDatabaseMojo
     {
         final List<String> databaseList = expandDatabaseList(databases);
 
-        final boolean permission = config.getBoolean("trumpet.permission.status-db", true);
+        final boolean permission = config.getBoolean(getPropertyName("permission.status-db"), true);
         if (!permission) {
             throw new MojoExecutionException("No permission to run this task!");
         }
