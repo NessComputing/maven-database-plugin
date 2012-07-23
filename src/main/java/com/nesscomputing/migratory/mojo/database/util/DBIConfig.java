@@ -5,7 +5,7 @@ import org.skife.config.DefaultNull;
 
 public interface DBIConfig
 {
-    @Config({"${_dbi_name}driver", "trumpet.default.driver"})
+    @Config({"${_dbi_name}driver", "${_prefix}.default.driver"})
     @DefaultNull
     String getDBDriverClass();
 
@@ -13,15 +13,15 @@ public interface DBIConfig
     @DefaultNull
     String getDBUrl();
 
-    @Config({"${_dbi_name}user", "trumpet.default.user"})
+    @Config({"${_dbi_name}user", "${_prefix}.default.user"})
     @DefaultNull
     String getDBUser();
 
-    @Config({"${_dbi_name}password", "trumpet.default.password"})
+    @Config({"${_dbi_name}password", "${_prefix}.default.password"})
     @DefaultNull
     String getDBPassword();
 
-    @Config({"${_dbi_name}tablespace", "trumpet.default.tablespace"})
+    @Config({"${_dbi_name}tablespace", "${_prefix}.default.tablespace"})
     @DefaultNull
     String getDBTablespace();
 }

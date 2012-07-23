@@ -12,9 +12,7 @@ import org.skife.jdbi.v2.util.IntegerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.nesscomputing.migratory.Migratory;
-import com.nesscomputing.migratory.MigratoryConfig;
 import com.nesscomputing.migratory.MigratoryException;
 import com.nesscomputing.migratory.MigratoryOption;
 import com.nesscomputing.migratory.mojo.database.util.DBIConfig;
@@ -249,9 +247,8 @@ public class CreateMojo extends AbstractDatabaseMojo
                     // Finally metadata is created as the database owner connected to the database.
 
                     final DBI dbi = getDBIFor(database);
-                    final MigratoryConfig config = getMigratoryConfig();
 
-                    Migratory migratory = new Migratory(config, dbi);
+                    Migratory migratory = new Migratory(migratoryConfig, dbi);
                     migratory.dbInit();
                 }
                 catch (DBIException de) {

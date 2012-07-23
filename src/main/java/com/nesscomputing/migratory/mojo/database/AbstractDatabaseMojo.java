@@ -1,5 +1,8 @@
 package com.nesscomputing.migratory.mojo.database;
 
+import static java.lang.String.format;
+
+import java.io.File;
 import java.io.StringReader;
 import java.net.URI;
 import java.util.Arrays;
@@ -20,13 +23,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.skife.config.CommonsConfigSource;
 import org.skife.config.ConfigurationObjectFactory;
-import org.skife.config.SimplePropertyConfigSource;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -37,35 +39,55 @@ import com.nesscomputing.migratory.loader.HttpLoader;
 import com.nesscomputing.migratory.loader.JarLoader;
 import com.nesscomputing.migratory.loader.LoaderManager;
 import com.nesscomputing.migratory.mojo.database.util.DBIConfig;
+import com.nesscomputing.migratory.mojo.database.util.InitialConfig;
 import com.pyx4j.log4j.MavenLogAppender;
 
 public abstract class AbstractDatabaseMojo extends AbstractMojo
 {
-    private static final String [] MUST_EXIST = new String [] { "trumpet.default.base", "trumpet.default.root_url", "trumpet.default.root_user", "trumpet.default.root_password", "trumpet.default.user", "trumpet.default.password" };
-    private static final String [] MUST_NOT_BE_EMPTY = new String [] { "trumpet.default.base", "trumpet.default.root_url", "trumpet.default.root_user", "trumpet.default.user" };
+    private static final String [] MUST_EXIST = new String [] { "default.base", "default.root_url", "default.root_user", "default.root_password", "default.user", "default.password" };
+    private static final String [] MUST_NOT_BE_EMPTY = new String [] { "default.base", "default.root_url", "default.root_user", "default.user" };
+
+    public static final String MIGRATORY_PROPERTIES_FILE = ".migratory.properties";
 
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDatabaseMojo.class);
 
-    protected DBIConfig rootDBIConfig;
-
-    protected Configuration config;
-
     private ConfigurationObjectFactory factory;
 
-    protected final LoaderManager loaderManager = new LoaderManager();
+    protected DBIConfig rootDBIConfig;
+    protected Configuration config;
+    protected InitialConfig initialConfig;
+    protected MigratoryConfig migratoryConfig;
+
+    protected LoaderManager loaderManager;
 
     protected MigratoryOption [] optionList;
 
-    /**
-     * @parameter expression="${manifest.url}" default-value="https://depot.trumpet.io/database/default"
-     */
-    protected String manifestUrl = "https://depot.trumpet.io/database/default";
+    private void stateCheck()
+        throws MojoExecutionException
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(rootDBIConfig == null ? "rootDBIConfig is null, " : "");
+        sb.append(config == null ? "config is null, " : "");
+        sb.append(initialConfig == null ? "initialConfig is null, " : "");
+        sb.append(migratoryConfig == null ? "migratoryConfig is null, " : "");
+        sb.append(loaderManager == null ? "loaderManager is null, " : "");
+        sb.append(optionList == null ? "optionList is null, " : "");
+
+        if (sb.length() > 0) {
+            throw new MojoExecutionException(format("Internal error (%s), refusing to run mojo !", sb));
+        }
+    }
 
     /**
-     * @parameter expression="${manifest.name}" default-value="development"
+     * @parameter expression="${manifest.url}"
      */
-    private String manifestName = "development";
+    protected String manifestUrl = null;
+
+    /**
+     * @parameter expression="${manifest.name}"
+     */
+    private String manifestName = null;
 
     /**
      * @parameter expression="${options}"
@@ -78,59 +100,88 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         MavenLogAppender.startPluginLog(this);
 
         try {
-            LOG.debug("Manifest URL: {}", manifestUrl);
-            LOG.debug("Manifest Name: {}", manifestName);
+            // Load the default manifest information.
+            //
+            final CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
+            // everything can be overridden by system properties.
+            config.addConfiguration(new SystemConfiguration(), "systemProperties");
 
-            // This config object is only used for the Http Loader, so that login and pw
-            // can be provided using plugin parameters.
-            final ConfigurationObjectFactory systemFactory = new ConfigurationObjectFactory(new SimplePropertyConfigSource(System.getProperties()));
+            final String userHome = System.getProperty("user.home");
+            if (userHome != null) {
+                final File propertyFile = new File(userHome, MIGRATORY_PROPERTIES_FILE);
+                if (propertyFile.exists() && propertyFile.canRead() && propertyFile.isFile()) {
+                    config.addConfiguration(new PropertiesConfiguration(propertyFile));
+                }
+            }
 
-            final MigratoryConfig migratoryConfig = new TrumpetSpecificDelegatingMigratoryConfig(systemFactory.build(MigratoryConfig.class));
+            final ConfigurationObjectFactory initialConfigFactory = new ConfigurationObjectFactory(new CommonsConfigSource(config));
 
-            loaderManager.addLoader(new FileLoader(Charsets.UTF_8));
-            loaderManager.addLoader(new JarLoader(Charsets.UTF_8));
-            loaderManager.addLoader(new HttpLoader(migratoryConfig));
+            // Load the initial config from the local config file
+            this.initialConfig = initialConfigFactory.build(InitialConfig.class);
+
+
+            if (this.manifestUrl == null) {
+                this.manifestUrl = initialConfig.getManifestUrl();
+            }
+
+            if (this.manifestName == null) {
+                this.manifestName = initialConfig.getManifestName();
+            }
+
+            LOG.debug("Manifest URL:      {}", manifestUrl);
+            LOG.debug("Manifest Name:     {}", manifestName);
 
             this.optionList = parseOptions(options);
 
             final StringBuilder location = new StringBuilder(manifestUrl);
-            if (!manifestUrl.endsWith("/")) {
+            if (!this.manifestUrl.endsWith("/")) {
                 location.append("/");
             }
-            manifestUrl = location.toString();
 
             // After here, the manifestUrl is guaranteed to have a / at the end!
+            this.manifestUrl = location.toString();
 
             location.append(manifestName);
             location.append(".manifest");
 
-            LOG.debug("Manifest location: {}", location);
+            LOG.debug("Manifest Location: {}", location);
 
-            final String contents = loaderManager.loadFile(URI.create(location.toString()));
+            final MigratoryConfig initialMigratoryConfig = initialConfigFactory.build(MigratoryConfig.class);
+            final LoaderManager initialLoaderManager = createLoaderManager(initialMigratoryConfig);
+            final String contents = initialLoaderManager.loadFile(URI.create(location.toString()));
 
             if (contents == null) {
-                throw new MojoExecutionException("Could not load manifest '" + manifestName + "' from '" + manifestUrl + "'");
+                throw new MojoExecutionException(format("Could not load manifest '%s' from '%s'", manifestName, manifestUrl));
             }
 
-            final CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
-            config.addConfiguration(new SystemConfiguration(), "systemProperties");
+            //
+            // Now add the contents of the manifest file to the configuration creating the
+            // final configuration for building the sql migration sets.
+            //
             final PropertiesConfiguration pc = new PropertiesConfiguration();
             pc.load(new StringReader(contents));
             config.addConfiguration(pc);
 
             if (!validateConfiguration(config)) {
-                throw new MojoExecutionException("Manifest '" + manifestName + "' is not valid. Refusing to execute!");
+                throw new MojoExecutionException(format("Manifest '%s' is not valid. Refusing to execute!", manifestName));
             }
 
             this.config = config;
-            LOG.debug("Configuration now: {}", this.config);
+            final ConfigurationObjectFactory factory = new ConfigurationObjectFactory(new CommonsConfigSource(config));
+            this.migratoryConfig = factory.build(MigratoryConfig.class);
+            this.loaderManager = createLoaderManager(migratoryConfig);
 
-            factory = new ConfigurationObjectFactory(new CommonsConfigSource(config));
-            rootDBIConfig = getDBIConfig("trumpet.default.root_");
+            LOG.debug("Configuration: {}", this.config);
+
+            this.rootDBIConfig = getDBIConfig(getPropertyName("default.root_"));
+
+            stateCheck();
 
             doExecute();
         }
         catch (Exception e) {
+            Throwables.propagateIfInstanceOf(e, MojoExecutionException.class);
+
             LOG.error("While executing Mojo {}: {}", this.getClass().getSimpleName(), e);
             throw new MojoExecutionException("Failure:" ,e);
         }
@@ -139,29 +190,28 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
         }
     }
 
-
-
     /**
      * Executes this mojo.
      */
     protected abstract void doExecute() throws Exception;
 
-    protected DBIConfig getDBIConfig(final String prefix)
+    protected String getPropertyName(final String name)
     {
-        return factory.buildWithReplacements(DBIConfig.class, ImmutableMap.of("_dbi_name", prefix));
+        return initialConfig.getDefaultPropertyPrefix() + "." + name;
     }
 
-    protected MigratoryConfig getMigratoryConfig()
+    private DBIConfig getDBIConfig(final String dbiName)
     {
-        return new TrumpetSpecificDelegatingMigratoryConfig(factory.build(MigratoryConfig.class));
+        return factory.buildWithReplacements(DBIConfig.class, ImmutableMap.of("_dbi_name", dbiName,
+                                                                              "_prefix", initialConfig.getDefaultPropertyPrefix()));
     }
 
     protected DBIConfig getDBIConfigFor(final String database)
     {
-        final DBIConfig baseConfig = getDBIConfig("trumpet.db." + database + ".");
+        final DBIConfig baseConfig = getDBIConfig(getPropertyName(format("db.%s.", database)));
         final String dbUrl = (baseConfig.getDBUrl() != null)
             ? baseConfig.getDBUrl()
-            : String.format(config.getString("trumpet.default.base"), database);
+            : String.format(config.getString(getPropertyName("default.base")), database);
 
         return new DBIConfig() {
             @Override
@@ -232,7 +282,8 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     {
         final List<String> databaseList = Lists.newArrayList();
 
-        Configuration dbConfig = config.subset("trumpet.db");
+        final Configuration dbConfig = config.subset(getPropertyName("db"));
+
         for (Iterator<?> it = dbConfig.getKeys(); it.hasNext(); ) {
             final String key = (String) it.next();
             if (key.contains(".")) {
@@ -265,8 +316,8 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     {
         final Map<String, MigrationInformation> availableMigrations = Maps.newHashMap();
 
-        addMigrations("trumpet.db." + database, availableMigrations);
-        addMigrations("trumpet.default.personalities", availableMigrations);
+        addMigrations(getPropertyName("db." + database), availableMigrations);
+        addMigrations(getPropertyName("default.personalities"), availableMigrations);
 
         return availableMigrations;
     }
@@ -316,25 +367,37 @@ public abstract class AbstractDatabaseMojo extends AbstractMojo
     {
         boolean valid = true;
         for (String mustExist : MUST_EXIST) {
-            if (!config.containsKey(mustExist)) {
-                LOG.error("The required property '{}' does not exist in the manifest.", mustExist);
-                valid = false;
-}
-        }
-
-        for (String mustNotBeEmpty : MUST_NOT_BE_EMPTY) {
-            if (StringUtils.isBlank(config.getString(mustNotBeEmpty, null))) {
-                LOG.error("The property '{}' must not be empty.", mustNotBeEmpty);
+            final String propertyName = getPropertyName(mustExist);
+            if (!config.containsKey(propertyName)) {
+                LOG.error("The required property '{}' does not exist in the manifest.", propertyName);
                 valid = false;
             }
         }
 
-        final String defaultBase = config.getString("trumpet.default.base", "");
+        for (String mustNotBeEmpty : MUST_NOT_BE_EMPTY) {
+            final String propertyName = getPropertyName(mustNotBeEmpty);
+            if (StringUtils.isBlank(config.getString(propertyName, null))) {
+                LOG.error("The property '{}' must not be empty.", propertyName);
+                valid = false;
+            }
+        }
+
+        final String defaultBase = config.getString(getPropertyName("default.base"), "");
         if (defaultBase.indexOf("%s") == -1 || defaultBase.indexOf("%s") != defaultBase.lastIndexOf("%s")) {
             LOG.error("The 'config.default.base' property must contain exactly one '%s' place holder!");
             valid = false;
         }
 
         return valid;
+    }
+
+    private LoaderManager createLoaderManager(final MigratoryConfig migratoryConfig)
+    {
+        final LoaderManager loaderManager = new LoaderManager();
+        loaderManager.addLoader(new FileLoader(Charsets.UTF_8));
+        loaderManager.addLoader(new JarLoader(Charsets.UTF_8));
+        loaderManager.addLoader(new HttpLoader(migratoryConfig));
+
+        return loaderManager;
     }
 }

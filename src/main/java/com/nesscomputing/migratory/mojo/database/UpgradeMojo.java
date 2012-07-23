@@ -10,10 +10,8 @@ import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.google.common.collect.Maps;
 import com.nesscomputing.migratory.Migratory;
-import com.nesscomputing.migratory.MigratoryConfig;
 import com.nesscomputing.migratory.MigratoryException;
 import com.nesscomputing.migratory.migration.MigrationPlan;
 import com.nesscomputing.migratory.mojo.database.util.DBIConfig;
@@ -54,7 +52,6 @@ public class UpgradeMojo extends AbstractDatabaseMojo
         }
 
         final Map<String, String> databases = extractDatabases(migrations);
-        final MigratoryConfig config = getMigratoryConfig();
 
         for (Map.Entry<String, String> database : databases.entrySet()) {
             final String databaseName = database.getKey();
@@ -68,7 +65,7 @@ public class UpgradeMojo extends AbstractDatabaseMojo
                 if (!rootMigrationPlan.isEmpty()) {
                     LOG.info("Migrating {} ...", databaseName);
 
-                    Migratory migratory = new Migratory(config, dbi, rootDbDbi);
+                    Migratory migratory = new Migratory(migratoryConfig, dbi, rootDbDbi);
                     migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                     migratory.dbMigrate(rootMigrationPlan, optionList);
                 }

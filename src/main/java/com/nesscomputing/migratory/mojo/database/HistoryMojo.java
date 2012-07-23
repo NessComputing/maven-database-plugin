@@ -10,9 +10,7 @@ import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import com.nesscomputing.migratory.Migratory;
-import com.nesscomputing.migratory.MigratoryConfig;
 import com.nesscomputing.migratory.MigratoryException;
 import com.nesscomputing.migratory.metadata.MetadataInfo;
 import com.nesscomputing.migratory.migration.MigrationPlanner.MigrationDirection;
@@ -59,10 +57,9 @@ public class HistoryMojo extends AbstractDatabaseMojo
             final DBIConfig databaseConfig = getDBIConfigFor(database);
             final DBI rootDbDbi = new DBI(databaseConfig.getDBUrl(), rootDBIConfig.getDBUser(), rootDBIConfig.getDBPassword());
             final DBI dbi = getDBIFor(database);
-            final MigratoryConfig config = getMigratoryConfig();
 
             try {
-                final Migratory migratory = new Migratory(config, dbi, rootDbDbi);
+                final Migratory migratory = new Migratory(migratoryConfig, dbi, rootDbDbi);
                 migratory.addLocator(new MojoLocator(migratory, manifestUrl));
                 final Map<String, List<MetadataInfo>> results = migratory.dbHistory(availableMigrations.keySet(), optionList);
 
