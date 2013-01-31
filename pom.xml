@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.nesscomputing</groupId>
     <artifactId>ness-oss-parent</artifactId>
-    <version>13</version>
+    <version>23</version>
   </parent>
 
   <groupId>com.nesscomputing.mojo</groupId>
@@ -160,6 +160,20 @@
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+	<plugin>
+          <groupId>com.ning.maven.plugins</groupId>
+          <artifactId>maven-duplicate-finder-plugin</artifactId>
+          <configuration>
+            <ignoredResources combine.children="append">
+	      <!-- com.nesscomputing.mojo.migratory-database-maven-plugin, pyx4j:maven-plugin-log4j -->
+              <ignoredResource>log4j.xml</ignoredResource>
+            </ignoredResources>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
 </project>
