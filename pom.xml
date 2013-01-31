@@ -8,7 +8,7 @@
 
   <groupId>com.nesscomputing.mojo</groupId>
   <artifactId>migratory-database-maven-plugin</artifactId>
-  <version>3.2-SNAPSHOT</version>
+  <version>3.2</version>
 
   <packaging>maven-plugin</packaging>
   <name>${project.artifactId}</name>
@@ -17,6 +17,7 @@
     <connection>scm:git:git://github.com/NessComputing/migratory-database-maven-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:NessComputing/migratory-database-maven-plugin.git</developerConnection>
     <url>http://github.com/NessComputing/migratory-database-maven-plugin</url>
+    <tag>migratory-database-maven-plugin-3.2</tag>
   </scm>
 
   <properties>
